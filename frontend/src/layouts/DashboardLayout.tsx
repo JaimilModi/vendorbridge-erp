@@ -44,57 +44,138 @@ export const DashboardLayout: React.FC = () => {
     }
   ];
 
-  const getMenuItems = () => {
-    if (!user) return [];
-    
-    const dashboardKey = 
-      user.role === 'ADMIN' ? '/admin/dashboard' :
-      user.role === 'PROCUREMENT_OFFICER' ? '/officer/dashboard' :
-      user.role === 'VENDOR' ? '/vendor/dashboard' :
-      '/manager/dashboard';
+const getMenuItems = () => {
+  if (!user) return [];
 
-    const baseMenu = [
-      { key: dashboardKey, icon: <DashboardOutlined />, label: 'Dashboard' }
+  const dashboardKey =
+    user.role === 'ADMIN'
+      ? '/admin/dashboard'
+      : user.role === 'PROCUREMENT_OFFICER'
+      ? '/officer/dashboard'
+      : user.role === 'VENDOR'
+      ? '/vendor/dashboard'
+      : '/manager/dashboard';
+
+  const baseMenu = [
+    {
+      key: dashboardKey,
+      icon: <DashboardOutlined />,
+      label: 'Dashboard',
+    },
+  ];
+
+  // ADMIN
+  if (user.role === 'ADMIN') {
+    return [
+      ...baseMenu,
+      {
+        key: '/vendors',
+        icon: <TeamOutlined />,
+        label: 'Vendors',
+      },
+      {
+        key: '/reports',
+        icon: <LineChartOutlined />,
+        label: 'Reports',
+      },
     ];
+  }
 
-    if (user.role === 'ADMIN') {
-      return [
-        ...baseMenu,
-        { key: '/vendors', icon: <TeamOutlined />, label: 'Vendors' },
-        { key: '/reports', icon: <LineChartOutlined />, label: 'Reports' },
-      ];
-    }
+  // PROCUREMENT OFFICER
+  if (user.role === 'PROCUREMENT_OFFICER') {
+    return [
+      ...baseMenu,
 
-    if (user.role === 'PROCUREMENT_OFFICER') {
-      return [
-        ...baseMenu,
-        { key: '/vendors', icon: <TeamOutlined />, label: 'Vendors' },
-        { key: '/rfqs', icon: <FileTextOutlined />, label: 'RFQs' },
-        { key: '/purchase-orders', icon: <ShoppingCartOutlined />, label: 'Purchase Orders' },
-        { key: '/invoices', icon: <AuditOutlined />, label: 'Invoices' },
-      ];
-    }
+      {
+        key: '/vendors',
+        icon: <TeamOutlined />,
+        label: 'Vendors',
+      },
 
-    if (user.role === 'VENDOR') {
-      return [
-        ...baseMenu,
-        { key: '/rfqs', icon: <FileTextOutlined />, label: 'RFQs' },
-        { key: '/quotations', icon: <SolutionOutlined />, label: 'Quotations' },
-        { key: '/purchase-orders', icon: <ShoppingCartOutlined />, label: 'Purchase Orders' },
-        { key: '/invoices', icon: <AuditOutlined />, label: 'Invoices' },
-      ];
-    }
+      {
+        key: '/rfqs',
+        icon: <FileTextOutlined />,
+        label: 'RFQs',
+      },
 
-    if (user.role === 'MANAGER') {
-      return [
-        ...baseMenu,
-        { key: '/approvals', icon: <CheckCircleOutlined />, label: 'Approvals' },
-        { key: '/reports', icon: <LineChartOutlined />, label: 'Reports' },
-      ];
-    }
+      {
+        key: '/quotations',
+        icon: <SolutionOutlined />,
+        label: 'Quotations',
+      },
 
-    return baseMenu;
-  };
+      {
+        key: '/purchase-orders',
+        icon: <ShoppingCartOutlined />,
+        label: 'Purchase Orders',
+      },
+
+      {
+        key: '/invoices',
+        icon: <AuditOutlined />,
+        label: 'Invoices',
+      },
+
+      {
+        key: '/reports',
+        icon: <LineChartOutlined />,
+        label: 'Reports',
+      },
+    ];
+  }
+
+  // VENDOR
+  if (user.role === 'VENDOR') {
+    return [
+      ...baseMenu,
+
+      {
+        key: '/rfqs',
+        icon: <FileTextOutlined />,
+        label: 'RFQs',
+      },
+
+      {
+        key: '/quotations',
+        icon: <SolutionOutlined />,
+        label: 'Quotations',
+      },
+
+      {
+        key: '/purchase-orders',
+        icon: <ShoppingCartOutlined />,
+        label: 'Purchase Orders',
+      },
+
+      {
+        key: '/invoices',
+        icon: <AuditOutlined />,
+        label: 'Invoices',
+      },
+    ];
+  }
+
+  // MANAGER
+  if (user.role === 'MANAGER') {
+    return [
+      ...baseMenu,
+
+      {
+        key: '/approvals',
+        icon: <CheckCircleOutlined />,
+        label: 'Approvals',
+      },
+
+      {
+        key: '/reports',
+        icon: <LineChartOutlined />,
+        label: 'Reports',
+      },
+    ];
+  }
+
+  return baseMenu;
+};
 
   const getRoleDisplayName = (role?: string) => {
     if (!role) return '';

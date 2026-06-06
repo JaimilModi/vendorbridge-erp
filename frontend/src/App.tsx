@@ -10,6 +10,7 @@ import Vendors from './pages/Vendors';
 import RFQs from './pages/RFQs';
 import { RFQDetails } from './pages/RFQDetails';
 import Quotations from './pages/Quotations';
+import QuotationDetails from './pages/QuotationDetails';
 import Approvals from './pages/Approvals';
 import PurchaseOrders from './pages/PurchaseOrders';
 import Invoices from './pages/Invoices';
@@ -48,7 +49,8 @@ const App: React.FC = () => {
             <Route path="vendors" element={<ProtectedRoute allowedRoles={['ADMIN', 'PROCUREMENT_OFFICER']}><Vendors /></ProtectedRoute>} />
             <Route path="rfqs" element={<ProtectedRoute allowedRoles={['PROCUREMENT_OFFICER', 'VENDOR']}><RFQs /></ProtectedRoute>} />
             <Route path="rfqs/:id" element={<ProtectedRoute allowedRoles={['PROCUREMENT_OFFICER', 'VENDOR', 'ADMIN']}><RFQDetails /></ProtectedRoute>} />
-            <Route path="quotations" element={<ProtectedRoute allowedRoles={['VENDOR']}><Quotations /></ProtectedRoute>} />
+            <Route path="quotations" element={<ProtectedRoute allowedRoles={['VENDOR', 'PROCUREMENT_OFFICER', 'ADMIN']}><Quotations /></ProtectedRoute>} />
+            <Route path="quotations/:id" element={<ProtectedRoute allowedRoles={['VENDOR', 'PROCUREMENT_OFFICER', 'ADMIN']}><QuotationDetails /></ProtectedRoute>} />
             <Route path="approvals" element={<ProtectedRoute allowedRoles={['MANAGER']}><Approvals /></ProtectedRoute>} />
             <Route path="purchase-orders" element={<ProtectedRoute allowedRoles={['PROCUREMENT_OFFICER', 'VENDOR']}><PurchaseOrders /></ProtectedRoute>} />
             <Route path="invoices" element={<ProtectedRoute allowedRoles={['PROCUREMENT_OFFICER', 'VENDOR']}><Invoices /></ProtectedRoute>} />
@@ -63,3 +65,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+

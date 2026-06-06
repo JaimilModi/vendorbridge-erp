@@ -5,9 +5,11 @@ import { authenticate, authorize } from '../middleware/auth';
 
 const router = Router();
 
-router.get('/', authenticate, QuotationController.getAll);
-router.get('/:id', authenticate, QuotationController.getById);
+router.get('/', authenticate, authorize(['ADMIN', 'PROCUREMENT_OFFICER', 'VENDOR', 'MANAGER']), QuotationController.getAll);
+router.get('/:id', authenticate, authorize(['ADMIN', 'PROCUREMENT_OFFICER', 'VENDOR', 'MANAGER']), QuotationController.getById);
 router.post('/', authenticate, authorize(['VENDOR', 'ADMIN']), validateQuotation, QuotationController.create);
-router.patch('/:id/status', authenticate, authorize(['ADMIN', 'PROCUREMENT_OFFICER', 'MANAGER']), QuotationController.updateStatus);
+router.put('/:id', authenticate, authorize(['VENDOR', 'ADMIN']), validateQuotation, QuotationController.update);
+router.delete('/:id', authenticate, authorize(['VENDOR', 'ADMIN']), QuotationController.delete);
 
 export default router;
+

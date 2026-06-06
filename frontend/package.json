@@ -1,0 +1,28 @@
+{
+  "name": "vendorbridge-frontend",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@ant-design/icons": "^5.6.1",
+    "antd": "^5.29.3",
+    "axios": "^1.17.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-router-dom": "^6.30.4",
+    "recharts": "^2.15.4"
+  },
+  "devDependencies": {
+    "@types/node": "^25.9.2",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "@vitejs/plugin-react": "^4.7.0",
+    "typescript": "^5.9.3",
+    "vite": "^5.4.21"
+  }
+}

@@ -173,6 +173,12 @@ const getMenuItems = () => {
       },
 
       {
+        key: '/invoices',
+        icon: <AuditOutlined />,
+        label: 'Invoices',
+      },
+
+      {
         key: '/reports',
         icon: <LineChartOutlined />,
         label: 'Reports',

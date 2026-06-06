@@ -146,7 +146,7 @@ export const Vendors: React.FC = () => {
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         footer={null}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form
           form={form}
@@ -154,6 +154,7 @@ export const Vendors: React.FC = () => {
           onFinish={onFinish}
           initialValues={{ status: 'ACTIVE' }}
           style={{ marginTop: 16 }}
+          preserve={false}
         >
           <Form.Item
             name="name"

@@ -119,7 +119,7 @@ export const RFQDetails: React.FC = () => {
           <Descriptions.Item label="Created By">
             {rfq.createdBy ? `${rfq.createdBy.firstName} ${rfq.createdBy.lastName}` : '-'}
           </Descriptions.Item>
-          <Descriptions.Item label="Description" span={2}>
+          <Descriptions.Item label="Description">
             {rfq.description || 'No description provided.'}
           </Descriptions.Item>
         </Descriptions>

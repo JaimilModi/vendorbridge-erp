@@ -28,6 +28,7 @@ export class PurchaseOrderService {
           },
         },
         vendor: true,
+        invoices: true,
       },
     });
   }
@@ -43,6 +44,7 @@ export class PurchaseOrderService {
           },
         },
         vendor: true,
+        invoices: true,
       },
     });
 

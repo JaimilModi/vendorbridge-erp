@@ -389,13 +389,14 @@ const Quotations: React.FC = () => {
         onCancel={() => setIsSubmitModalOpen(false)}
         footer={null}
         width={700}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form
           form={form}
           layout="vertical"
           onFinish={onSubmit}
           style={{ marginTop: 16 }}
+          preserve={false}
         >
           <Form.Item
             name="rfqId"

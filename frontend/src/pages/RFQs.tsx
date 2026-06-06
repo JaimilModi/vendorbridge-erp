@@ -174,7 +174,7 @@ export const RFQs: React.FC = () => {
         onCancel={() => setIsModalOpen(false)}
         footer={null}
         width={700}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form
           form={form}
@@ -182,6 +182,7 @@ export const RFQs: React.FC = () => {
           onFinish={onFinish}
           initialValues={{ status: 'DRAFT' }}
           style={{ marginTop: 16 }}
+          preserve={false}
         >
           <Form.Item
             name="title"

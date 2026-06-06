@@ -15,6 +15,7 @@ import Approvals from './pages/Approvals';
 import PurchaseOrders from './pages/PurchaseOrders';
 import PurchaseOrderDetails from './pages/PurchaseOrderDetails';
 import Invoices from './pages/Invoices';
+import InvoiceDetails from './pages/InvoiceDetails';
 import Reports from './pages/Reports';
 
 const RootRedirect: React.FC = () => {
@@ -55,7 +56,8 @@ const App: React.FC = () => {
             <Route path="approvals" element={<ProtectedRoute allowedRoles={['MANAGER', 'PROCUREMENT_OFFICER', 'VENDOR', 'ADMIN']}><Approvals /></ProtectedRoute>} />
             <Route path="purchase-orders" element={<ProtectedRoute allowedRoles={['PROCUREMENT_OFFICER', 'VENDOR', 'MANAGER', 'ADMIN']}><PurchaseOrders /></ProtectedRoute>} />
             <Route path="purchase-orders/:id" element={<ProtectedRoute allowedRoles={['PROCUREMENT_OFFICER', 'VENDOR', 'MANAGER', 'ADMIN']}><PurchaseOrderDetails /></ProtectedRoute>} />
-            <Route path="invoices" element={<ProtectedRoute allowedRoles={['PROCUREMENT_OFFICER', 'VENDOR']}><Invoices /></ProtectedRoute>} />
+            <Route path="invoices" element={<ProtectedRoute allowedRoles={['PROCUREMENT_OFFICER', 'VENDOR', 'MANAGER', 'ADMIN']}><Invoices /></ProtectedRoute>} />
+            <Route path="invoices/:id" element={<ProtectedRoute allowedRoles={['PROCUREMENT_OFFICER', 'VENDOR', 'MANAGER', 'ADMIN']}><InvoiceDetails /></ProtectedRoute>} />
             <Route path="reports" element={<ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}><Reports /></ProtectedRoute>} />
           </Route>
 

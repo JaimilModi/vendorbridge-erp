@@ -211,7 +211,7 @@ const QuotationDetails: React.FC = () => {
           <Descriptions.Item label="Validity Date">
             {formatDate(quotation.validityDate)}
           </Descriptions.Item>
-          <Descriptions.Item label="Total Amount" span={2}>
+          <Descriptions.Item label="Total Amount">
             <span style={{ fontSize: 16, fontWeight: 'bold', color: '#1677ff' }}>
               {formatCurrency(Number(quotation.totalAmount))}
             </span>
@@ -305,13 +305,14 @@ const QuotationDetails: React.FC = () => {
         onCancel={() => setIsEditModalOpen(false)}
         footer={null}
         width={700}
-        destroyOnClose
+        destroyOnHidden
       >
         <Form
           form={form}
           layout="vertical"
           onFinish={onFinish}
           style={{ marginTop: 16 }}
+          preserve={false}
         >
           <Form.Item
             name="validityDate"

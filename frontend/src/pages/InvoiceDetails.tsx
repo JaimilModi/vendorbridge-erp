@@ -3,36 +3,36 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Card, Button, Descriptions, Table, Tag, Typography, Spin, Space, Select, message } from 'antd';
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import api from '../services/api';
-import { PurchaseOrder } from '../types';
+import { Invoice } from '../types';
 import { useAuth } from '../context/AuthContext';
 import { getStatusTagColor, formatDate, formatCurrency } from '../utils';
 
 const { Title, Paragraph } = Typography;
 const { Option } = Select;
 
-const PurchaseOrderDetails: React.FC = () => {
+const InvoiceDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [po, setPo] = useState<PurchaseOrder | null>(null);
+  const [invoice, setInvoice] = useState<Invoice | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  const fetchPODetails = async () => {
+  const fetchInvoiceDetails = async () => {
     setLoading(true);
     try {
-      const response = await api.get(`/purchase-orders/${id}`);
-      setPo(response.data);
+      const response = await api.get(`/invoices/${id}`);
+      setInvoice(response.data);
     } catch (error: any) {
-      message.error(error.response?.data?.message || 'Failed to fetch Purchase Order details');
-      navigate('/purchase-orders');
+      message.error(error.response?.data?.message || 'Failed to fetch invoice details');
+      navigate('/invoices');
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchPODetails();
+    fetchInvoiceDetails();
   }, [id]);
 
   const isOfficer = user?.role === 'PROCUREMENT_OFFICER' || user?.role === 'ADMIN';
@@ -40,11 +40,11 @@ const PurchaseOrderDetails: React.FC = () => {
   const handleStatusChange = async (newStatus: string) => {
     setUpdating(true);
     try {
-      await api.put(`/purchase-orders/${id}/status`, { status: newStatus });
-      message.success(`Status updated to ${newStatus} successfully`);
-      fetchPODetails();
+      await api.put(`/invoices/${id}/status`, { status: newStatus });
+      message.success(`Invoice status updated to ${newStatus} successfully`);
+      fetchInvoiceDetails();
     } catch (error: any) {
-      message.error(error.response?.data?.message || 'Failed to update status');
+      message.error(error.response?.data?.message || 'Failed to update invoice status');
     } finally {
       setUpdating(false);
     }
@@ -58,11 +58,11 @@ const PurchaseOrderDetails: React.FC = () => {
     );
   }
 
-  if (!po) {
+  if (!invoice) {
     return (
       <Card style={{ textAlign: 'center', marginTop: 24 }}>
-        <Paragraph>Purchase Order not found or access denied.</Paragraph>
-        <Button type="primary" onClick={() => navigate('/purchase-orders')}>Back to Purchase Orders</Button>
+        <Paragraph>Invoice not found or access denied.</Paragraph>
+        <Button type="primary" onClick={() => navigate('/invoices')}>Back to Invoices</Button>
       </Card>
     );
   }
@@ -102,64 +102,64 @@ const PurchaseOrderDetails: React.FC = () => {
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div style={{ display: 'flex', alignItems: 'center' }}>
-          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/purchase-orders')} style={{ marginRight: 16 }} />
-          <Title level={2} style={{ margin: 0 }}>Purchase Order Details</Title>
+          <Button icon={<ArrowLeftOutlined />} onClick={() => navigate('/invoices')} style={{ marginRight: 16 }} />
+          <Title level={2} style={{ margin: 0 }}>Invoice Details</Title>
         </div>
       </div>
 
       <Card className="card-shadow" style={{ marginBottom: 24 }}>
-        <Descriptions title={`Purchase Order: ${po.poNumber}`} bordered column={{ xs: 1, sm: 2 }}>
-          <Descriptions.Item label="PO Reference UUID">
-            <span style={{ fontFamily: 'monospace' }}>{po.id}</span>
+        <Descriptions title={`Invoice: ${invoice.invoiceNumber}`} bordered column={{ xs: 1, sm: 2 }}>
+          <Descriptions.Item label="Invoice Reference UUID">
+            <span style={{ fontFamily: 'monospace' }}>{invoice.id}</span>
           </Descriptions.Item>
           <Descriptions.Item label="Status">
-            <Tag color={getStatusTagColor(po.status)}>{po.status}</Tag>
+            <Tag color={getStatusTagColor(invoice.status)}>{invoice.status}</Tag>
           </Descriptions.Item>
-          <Descriptions.Item label="Associated Quotation">
-            <Button type="link" onClick={() => navigate(`/quotations/${po.quotationId}`)} style={{ padding: 0, height: 'auto' }}>
-              QO-{po.quotationId.substring(0, 8).toUpperCase()}
+          <Descriptions.Item label="Associated PO">
+            <Button type="link" onClick={() => navigate(`/purchase-orders/${invoice.poId}`)} style={{ padding: 0, height: 'auto' }}>
+              {invoice.po?.poNumber || 'View PO'}
             </Button>
           </Descriptions.Item>
           <Descriptions.Item label="RFQ Name">
-            {po.quotation?.rfq?.title || '-'}
+            {invoice.po?.quotation?.rfq?.title || '-'}
           </Descriptions.Item>
           <Descriptions.Item label="Vendor">
-            {po.vendor?.name || '-'}
+            {invoice.vendor?.name || '-'}
           </Descriptions.Item>
-          <Descriptions.Item label="Date Created">
-            {formatDate(po.createdAt)}
+          <Descriptions.Item label="Due Date">
+            {formatDate(invoice.dueDate)}
           </Descriptions.Item>
           <Descriptions.Item label="Total Amount">
             <span style={{ fontSize: 16, fontWeight: 'bold', color: '#1677ff' }}>
-              {formatCurrency(Number(po.totalAmount))}
+              {formatCurrency(Number(invoice.totalAmount))}
             </span>
           </Descriptions.Item>
         </Descriptions>
       </Card>
 
       {isOfficer && (
-        <Card title="Manage PO Status" className="card-shadow" style={{ marginBottom: 24 }}>
+        <Card title="Manage Invoice Status" className="card-shadow" style={{ marginBottom: 24 }}>
           <Space>
             <span>Update Status:</span>
             <Select
-              value={po.status}
+              value={invoice.status}
               style={{ width: 150 }}
               onChange={handleStatusChange}
               loading={updating}
             >
               <Option value="DRAFT">Draft</Option>
-              <Option value="ISSUED">Issued</Option>
-              <Option value="COMPLETED">Completed</Option>
-              <Option value="CANCELLED">Cancelled</Option>
+              <Option value="SENT">Sent</Option>
+              <Option value="PAID">Paid</Option>
+              <Option value="OVERDUE">Overdue</Option>
             </Select>
           </Space>
         </Card>
       )}
 
-      <Card title="Line Items" className="card-shadow">
+      <Card title="Invoice Items" className="card-shadow">
         <Table
           columns={columns}
-          dataSource={(po.items || []).map((item, index) => ({ ...item, key: item.id || index }))}
+          dataSource={(invoice.items || []).map((item, index) => ({ ...item, key: item.id || index }))}
           pagination={false}
         />
       </Card>
@@ -167,4 +167,4 @@ const PurchaseOrderDetails: React.FC = () => {
   );
 };
 
-export default PurchaseOrderDetails;
+export default InvoiceDetails;

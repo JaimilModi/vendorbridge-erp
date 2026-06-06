@@ -1,13 +1,39 @@
 import { Router } from 'express';
 import { InvoiceController } from '../controllers/invoice.controller';
-import { validateInvoice } from '../validators/invoice.validator';
 import { authenticate, authorize } from '../middleware/auth';
 
 const router = Router();
 
-router.get('/', authenticate, InvoiceController.getAll);
-router.get('/:id', authenticate, InvoiceController.getById);
-router.post('/', authenticate, authorize(['VENDOR', 'ADMIN']), validateInvoice, InvoiceController.create);
-router.patch('/:id/status', authenticate, authorize(['ADMIN', 'PROCUREMENT_OFFICER', 'MANAGER']), InvoiceController.updateStatus);
+// GET ALL
+router.get(
+  '/',
+  authenticate,
+  authorize(['ADMIN', 'PROCUREMENT_OFFICER', 'VENDOR', 'MANAGER']),
+  InvoiceController.getAll
+);
+
+// GENERATE INVOICE
+router.post(
+  '/generate/:poId',
+  authenticate,
+  authorize(['PROCUREMENT_OFFICER', 'ADMIN']),
+  InvoiceController.generate
+);
+
+// UPDATE STATUS
+router.put(
+  '/:id/status',
+  authenticate,
+  authorize(['PROCUREMENT_OFFICER', 'ADMIN']),
+  InvoiceController.updateStatus
+);
+
+// GET BY ID (KEEP LAST)
+router.get(
+  '/:id',
+  authenticate,
+  authorize(['ADMIN', 'PROCUREMENT_OFFICER', 'VENDOR', 'MANAGER']),
+  InvoiceController.getById
+);
 
 export default router;

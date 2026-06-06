@@ -12,6 +12,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '../../components/ui/Ca
 const signupSchema = z.object({
   fullName: z.string().min(2, 'Full name is required'),
   companyName: z.string().optional(),
+  gstin: z.string().optional(),
+  category: z.string().optional(),
+  address: z.string().optional(),
   email: z.string().email('Invalid email address'),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   role: z.enum(['admin', 'procurement_officer', 'vendor', 'manager'], {
@@ -26,17 +29,24 @@ export default function SignupPage() {
   const navigate = useNavigate();
   const { login: setAuth } = useAuthStore();
   
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<SignupFormValues>({
+  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema)
   });
+  
+  const selectedRole = watch('role');
 
   const onSubmit = async (data: SignupFormValues) => {
     try {
       setError('');
       const { user, token } = await authApi.signup({
         email: data.email,
+        password: data.password,
         fullName: data.fullName,
-        role: data.role as any
+        role: data.role as any,
+        companyName: data.companyName,
+        gstin: data.gstin,
+        category: data.category,
+        address: data.address
       });
       setAuth(user, token);
       navigate('/dashboard');
@@ -93,6 +103,38 @@ export default function SignupPage() {
               </select>
               {errors.role && <p className="text-sm font-medium text-destructive">{errors.role.message}</p>}
             </div>
+
+            {selectedRole === 'vendor' && (
+              <div className="space-y-4 p-4 border border-border rounded-md bg-muted/20">
+                <h4 className="font-semibold text-sm">Vendor Details</h4>
+                <div className="grid grid-cols-2 gap-4">
+                  <Input 
+                    label="GSTIN" 
+                    {...register('gstin')} 
+                    error={errors.gstin?.message} 
+                  />
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium leading-none">Category</label>
+                    <select 
+                      {...register('category')}
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                    >
+                      <option value="">Select category...</option>
+                      <option value="IT Equipment">IT Equipment</option>
+                      <option value="Office Supplies">Office Supplies</option>
+                      <option value="Furniture">Furniture</option>
+                      <option value="Software">Software</option>
+                      <option value="Services">Services</option>
+                    </select>
+                  </div>
+                </div>
+                <Input 
+                  label="Business Address" 
+                  {...register('address')} 
+                  error={errors.address?.message} 
+                />
+              </div>
+            )}
             
             <Input 
               label="Email" 

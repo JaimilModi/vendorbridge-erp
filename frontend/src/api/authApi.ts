@@ -1,37 +1,39 @@
-import { mockDb, delay } from './mockDb';
 import { User } from '../types';
 
 export const authApi = {
   login: async (email: string, password: string): Promise<{ user: User; token: string }> => {
-    await delay();
-    const user = mockDb.users.find(u => u.email === email);
-    if (!user) {
-      throw new Error('Invalid email or password');
-    }
-    // Simple mock token
-    const token = `mock_jwt_${user.id}_${Date.now()}`;
-    return { user, token };
+    const res = await fetch('http://localhost:5000/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Login failed');
+    return { user: data.data.user, token: data.data.token };
   },
 
-  signup: async (data: Partial<User>): Promise<{ user: User; token: string }> => {
-    await delay();
-    if (mockDb.users.some(u => u.email === data.email)) {
-      throw new Error('Email already in use');
-    }
-    
-    const newUser: User = {
-      id: `u${mockDb.users.length + 1}`,
-      email: data.email!,
-      fullName: data.fullName!,
-      role: data.role || 'vendor',
-      isActive: true,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    };
-    
-    mockDb.users.push(newUser);
-    const token = `mock_jwt_${newUser.id}_${Date.now()}`;
-    return { user: newUser, token };
+  signup: async (userData: Partial<User>): Promise<{ user: User; token: string }> => {
+    const res = await fetch('http://localhost:5000/api/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData)
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Signup failed');
+    return { user: data.data.user, token: data.data.token };
+  },
+
+  me: async (token: string): Promise<User> => {
+    const res = await fetch('http://localhost:5000/api/auth/me', {
+      method: 'GET',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to authenticate');
+    return data.data.user;
   },
 
   forgotPassword: async (email: string): Promise<void> => {

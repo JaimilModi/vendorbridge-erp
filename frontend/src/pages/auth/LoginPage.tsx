@@ -109,27 +109,6 @@ export default function LoginPage() {
             </Link>
           </div>
           
-          <div className="mt-8 pt-6 border-t border-border">
-            <p className="text-xs text-muted-foreground text-center mb-3 font-semibold uppercase tracking-wider">Demo Accounts</p>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
-              <div className="bg-secondary p-2 rounded border border-border">
-                <span className="font-semibold">Admin:</span> admin@vendorbridge.com<br/>
-                <span className="text-muted-foreground">Pwd: Admin@123</span>
-              </div>
-              <div className="bg-secondary p-2 rounded border border-border">
-                <span className="font-semibold">Procurement:</span> procurement@vendorbridge.com<br/>
-                <span className="text-muted-foreground">Pwd: Procurement@123</span>
-              </div>
-              <div className="bg-secondary p-2 rounded border border-border">
-                <span className="font-semibold">Manager:</span> manager@vendorbridge.com<br/>
-                <span className="text-muted-foreground">Pwd: Manager@123</span>
-              </div>
-              <div className="bg-secondary p-2 rounded border border-border">
-                <span className="font-semibold">Vendor:</span> vendor1@techsupply.com<br/>
-                <span className="text-muted-foreground">Pwd: Vendor1@123</span>
-              </div>
-            </div>
-          </div>
         </CardContent>
       </Card>
     </div>

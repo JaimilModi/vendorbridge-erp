@@ -46,6 +46,9 @@ export default function QuotationComparePage() {
     setSelectingId(quoteId);
     try {
       await quotationApi.selectWinner(quoteId, rfqId!, user?.id || 'system');
+      // Import and use approvalApi to create the approval request
+      const { approvalApi } = await import('../../api/approvalApi');
+      await approvalApi.create({ quotationId: quoteId, notes: 'System generated approval request' });
       navigate('/approvals');
     } catch (err) {
       console.error(err);

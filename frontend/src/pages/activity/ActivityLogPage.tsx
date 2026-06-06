@@ -17,7 +17,21 @@ export default function ActivityLogPage() {
   }, []);
 
   const handleExport = () => {
-    alert('Mock: Exporting Audit Trail to CSV...');
+    if (logs.length === 0) return;
+    
+    let csv = "Action,Entity Type,Entity ID,User,Date\n";
+    logs.forEach(log => {
+      csv += `"${log.action}","${log.entityType}","${log.entityId}","${log.user?.fullName || log.userId}","${new Date(log.createdAt).toLocaleString()}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `activity_logs_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   if (loading) return <div className="p-8">Loading logs...</div>;

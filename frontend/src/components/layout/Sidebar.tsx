@@ -10,6 +10,8 @@ import {
   CheckSquare, 
   ShoppingCart, 
   Receipt, 
+  CreditCard,
+  FileBadge,
   BarChart3, 
   Activity 
 } from 'lucide-react';
@@ -28,8 +30,11 @@ export default function Sidebar() {
     { name: 'Approvals', href: '/approvals', icon: CheckSquare, roles: [ROLES.ADMIN, ROLES.MANAGER] },
     { name: 'Purchase Orders', href: '/purchase-orders', icon: ShoppingCart, roles: [ROLES.ADMIN, ROLES.PROCUREMENT_OFFICER, ROLES.MANAGER, ROLES.VENDOR] },
     { name: 'Invoices', href: '/invoices', icon: Receipt, roles: [ROLES.ADMIN, ROLES.PROCUREMENT_OFFICER, ROLES.MANAGER, ROLES.VENDOR] },
+    { name: 'Payments', href: '/payments', icon: CreditCard, roles: [ROLES.ADMIN, ROLES.PROCUREMENT_OFFICER, ROLES.MANAGER, ROLES.VENDOR] },
+    { name: 'Receipts', href: '/receipts', icon: FileBadge, roles: [ROLES.ADMIN, ROLES.PROCUREMENT_OFFICER, ROLES.MANAGER, ROLES.VENDOR] },
     { name: 'Reports', href: '/reports', icon: BarChart3, roles: [ROLES.ADMIN, ROLES.MANAGER] },
     { name: 'Activity Logs', href: '/activity', icon: Activity, roles: [ROLES.ADMIN] },
+    { name: 'User Management', href: '/users', icon: Users, roles: [ROLES.ADMIN] },
   ];
 
   const visibleLinks = links.filter(link => link.roles.includes(user.role));

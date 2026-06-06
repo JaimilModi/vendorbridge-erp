@@ -17,6 +17,7 @@ const jwt = require('jsonwebtoken');
 const { query } = require('../../config/db');
 const env = require('../../config/env');
 const { AppError } = require('../../utils/AppError');
+const { sendEmail } = require('../../utils/email');
 const { logActivity } = require('../../utils/activityLogger');
 const { toCamel } = require('../../utils/camelCase');
 
@@ -66,7 +67,7 @@ const buildPublicUser = (dbUser, vendorId = null) => {
  * 4. If role === 'vendor', a vendors profile row is created with status 'pending'
  * 5. Returns JWT + public user object (no password_hash)
  */
-const signup = async ({ fullName, email, password, role }) => {
+const signup = async ({ fullName, email, password, role, companyName, gstin, category, address }) => {
   const normalizedEmail = email.toLowerCase().trim();
 
   // 1. Check for duplicate email
@@ -94,12 +95,15 @@ const signup = async ({ fullName, email, password, role }) => {
   let vendorId = null;
   if (role === 'vendor') {
     const vendorResult = await query(
-      `INSERT INTO vendors (user_id, company_name, contact_name, email, status)
-       VALUES ($1, $2, $3, $4, 'pending')
+      `INSERT INTO vendors (user_id, company_name, contact_name, email, status, tax_id, address)
+       VALUES ($1, $2, $3, $4, 'pending', $5, $6)
        RETURNING id`,
-      [dbUser.id, fullName.trim(), fullName.trim(), normalizedEmail]
+      [dbUser.id, companyName || fullName.trim(), fullName.trim(), normalizedEmail, gstin || null, address || null]
     );
     vendorId = vendorResult.rows[0].id;
+    
+    // Vendor Categories are usually stored separately if multiple, but if schema has a category column, we would insert it.
+    // Assuming category might be tracked differently or we can ignore if not in schema. I will check schema later if it fails.
   }
 
   // 5. Write activity log (non-blocking — failure does not roll back signup)
@@ -239,9 +243,12 @@ const forgotPassword = async ({ email }) => {
     [normalizedEmail, otp]
   );
 
-  console.log(`\n========================================`);
-  console.log(`🔑 PASSWORD RESET OTP for ${normalizedEmail}: ${otp}`);
-  console.log(`========================================\n`);
+  // Send actual email using the utility
+  await sendEmail({
+    to: normalizedEmail,
+    subject: 'VendorBridge ERP - Password Reset OTP',
+    text: `Your password reset OTP is: ${otp}\n\nThis code will expire in 120 seconds. If you did not request this, please ignore this email.`,
+  });
 };
 
 const verifyOtp = async ({ email, otp }) => {

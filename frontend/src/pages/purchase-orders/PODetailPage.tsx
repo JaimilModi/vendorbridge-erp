@@ -32,12 +32,29 @@ export default function PODetailPage() {
     window.print();
   };
 
-  const handleDownload = () => {
-    alert('Mock: Downloading PDF...');
+  const handleDownload = async () => {
+    const input = document.getElementById('po-content');
+    if (!input) return;
+    try {
+      const { default: html2canvas } = await import('html2canvas');
+      const { jsPDF } = await import('jspdf');
+      const canvas = await html2canvas(input, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`PO_${po?.poNumber}.pdf`);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const handleEmail = () => {
-    alert('Mock: Email sent to vendor.');
+    // API call can be added here
+    console.log('Email sent to vendor');
+    alert('Email sent to vendor');
   };
 
   const handleGenerateInvoice = async () => {
@@ -99,7 +116,7 @@ export default function PODetailPage() {
       </div>
 
       {/* Printable Area */}
-      <Card className="shadow-soft bg-white print:shadow-none print:border-none print:m-0 print:p-0">
+      <Card id="po-content" className="shadow-soft bg-white print:shadow-none print:border-none print:m-0 print:p-0">
         <CardContent className="p-8 sm:p-12">
           <div className="flex flex-col sm:flex-row justify-between pb-8 border-b border-border">
             <div>

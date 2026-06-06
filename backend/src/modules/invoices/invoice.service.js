@@ -23,6 +23,7 @@ const { AppError } = require('../../utils/AppError');
 const { toCamel, rowsToCamel } = require('../../utils/camelCase');
 const { logActivity } = require('../../utils/activityLogger');
 const { generateNumber } = require('../../utils/generateNumber');
+const { sendEmail } = require('../../utils/email');
 
 const TAX_RATE = 0.10; // 10% — matches PO service and frontend display
 
@@ -284,4 +285,46 @@ const updateStatus = async (id, { status, notes }, user) => {
   return _enrichInvoice(id);
 };
 
-module.exports = { getAll, getMy, getById, create, updateStatus };
+const emailInvoice = async (id, user) => {
+  const invoice = await _enrichInvoice(id);
+  
+  if (user.role === 'vendor') {
+    const vendorId = await resolveVendorId(user.id);
+    if (invoice.vendorId !== vendorId) {
+      throw new AppError('You do not have access to email this invoice.', 403, 'FORBIDDEN');
+    }
+  }
+
+  const emailHtml = `
+    <h2>Invoice ${invoice.invoiceNumber}</h2>
+    <p>Dear VendorBridge Accounts Payable,</p>
+    <p>Please find the details for invoice <strong>${invoice.invoiceNumber}</strong> attached.</p>
+    <ul>
+      <li>Vendor: ${invoice.vendorName}</li>
+      <li>PO Ref: ${invoice.poNumber}</li>
+      <li>Total Amount: $${invoice.totalAmount}</li>
+      <li>Tax: $${invoice.taxAmount}</li>
+      <li><strong>Grand Total: $${invoice.grandTotal}</strong></li>
+      <li>Due Date: ${invoice.dueDate ? new Date(invoice.dueDate).toLocaleDateString() : 'N/A'}</li>
+    </ul>
+    <p>Login to the VendorBridge portal to process this invoice.</p>
+  `;
+
+  await sendEmail({
+    to: 'accountspayable@vendorbridge.com', // Simulate sending to AP
+    subject: `VendorBridge ERP - Invoice ${invoice.invoiceNumber} from ${invoice.vendorName}`,
+    html: emailHtml,
+  });
+  
+  await logActivity({
+    userId: user.id,
+    action: 'INVOICE_EMAILED',
+    entityType: 'invoice',
+    entityId: id,
+    metadata: { invoiceNumber: invoice.invoiceNumber },
+  });
+  
+  return { success: true };
+}
+
+module.exports = { getAll, getMy, getById, create, updateStatus, emailInvoice };

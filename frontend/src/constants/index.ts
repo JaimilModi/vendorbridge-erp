@@ -58,3 +58,20 @@ export const INVOICE_STATUS = {
 } as const;
 
 export type InvoiceStatus = typeof INVOICE_STATUS[keyof typeof INVOICE_STATUS];
+
+export const PAYMENT_STATUS = {
+  PROCESSING: 'processing',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+} as const;
+
+export type PaymentStatus = typeof PAYMENT_STATUS[keyof typeof PAYMENT_STATUS];
+
+export const PAYMENT_METHOD = {
+  BANK_TRANSFER: 'bank_transfer',
+  CREDIT_CARD: 'credit_card',
+  CHEQUE: 'cheque',
+  CASH: 'cash',
+} as const;
+
+export type PaymentMethod = typeof PAYMENT_METHOD[keyof typeof PAYMENT_METHOD];

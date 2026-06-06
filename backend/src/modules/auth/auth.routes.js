@@ -43,6 +43,10 @@ const signupSchema = z.object({
       message: `Role must be one of: ${VALID_ROLES.join(', ')}`,
     }),
   }),
+  companyName: z.string().trim().optional(),
+  gstin: z.string().trim().optional(),
+  category: z.string().trim().optional(),
+  address: z.string().trim().optional(),
 });
 
 /**

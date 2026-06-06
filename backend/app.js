@@ -29,6 +29,9 @@ const poRoutes = require('./src/modules/purchase-orders/po.routes');
 const invoiceRoutes = require('./src/modules/invoices/invoice.routes');
 const activityLogRoutes = require('./src/modules/activity-logs/activityLog.routes');
 const reportsRoutes = require('./src/modules/reports/reports.routes');
+const userRoutes = require('./src/modules/users/user.routes');
+const paymentRoutes = require('./src/modules/payments/payment.routes');
+const receiptRoutes = require('./src/modules/receipts/receipt.routes');
 
 // ─────────────────────────────────────────────────────────────────────────────
 // App initialization
@@ -73,6 +76,9 @@ app.use('/api/purchase-orders', poRoutes);
 app.use('/api/invoices', invoiceRoutes);
 app.use('/api/activity-logs', activityLogRoutes);
 app.use('/api/reports', reportsRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/payments', paymentRoutes);
+app.use('/api/receipts', receiptRoutes);
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 404 handler — catch-all for unmatched routes

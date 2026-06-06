@@ -9,40 +9,59 @@ import { formatCurrency } from '../../lib/utils';
 
 const COLORS = ['#0f172a', '#334155', '#64748b', '#94a3b8', '#cbd5e1'];
 
-// Mock monthly data for the chart
-const monthlyTrend = [
-  { name: 'Jan', spend: 4000, pos: 24 },
-  { name: 'Feb', spend: 3000, pos: 13 },
-  { name: 'Mar', spend: 2000, pos: 98 },
-  { name: 'Apr', spend: 2780, pos: 39 },
-  { name: 'May', spend: 1890, pos: 48 },
-  { name: 'Jun', spend: 2390, pos: 38 },
-];
-
-const vendorPerformance = [
-  { name: 'TechSupply Inc.', score: 98 },
-  { name: 'Global Logistics', score: 92 },
-  { name: 'Office Essentials', score: 85 },
-  { name: 'CloudNet Systems', score: 95 },
-  { name: 'Acme Corp', score: 78 },
-];
-
 export default function ReportsPage() {
   const [stats, setStats] = useState<any>(null);
+  const [monthlyTrend, setMonthlyTrend] = useState<any[]>([]);
+  const [vendorPerformance, setVendorPerformance] = useState<any[]>([]);
 
   useEffect(() => {
     dashboardApi.getSummary().then(setStats);
+    dashboardApi.getMonthlyTrend().then(res => {
+      // Map to expected format
+      const mapped = res.data?.map((m: any) => ({
+        name: m.month,
+        spend: m.totalSpend,
+        pos: m.poCount
+      })) || [];
+      setMonthlyTrend(mapped);
+    });
+    dashboardApi.getVendorPerformance().then(res => {
+      // Top 5 vendors
+      const mapped = res.data?.slice(0, 5).map((v: any) => ({
+        name: v.name,
+        score: v.winRate || 0 // Assuming winRate is a good proxy for score
+      })) || [];
+      setVendorPerformance(mapped);
+    });
   }, []);
 
   const handleExport = () => {
-    alert('Mock: Exporting Analytics to CSV...');
+    // Generate simple CSV from vendor performance and monthly trend
+    let csv = "--- Monthly Trend ---\nMonth,Spend,POs\n";
+    monthlyTrend.forEach(row => {
+      csv += `${row.name},${row.spend},${row.pos}\n`;
+    });
+    
+    csv += "\n--- Vendor Performance ---\nVendor,Score\n";
+    vendorPerformance.forEach(row => {
+      csv += `${row.name},${row.score}\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `vendorbridge_analytics_${new Date().toISOString().split('T')[0]}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   const statCards = [
-    { title: 'Total Spend (YTD)', value: formatCurrency(124500), icon: DollarSign, trend: '+14%' },
-    { title: 'Active POs', value: stats?.activePOs || 0, icon: FileText, trend: '+2' },
-    { title: 'Pending Approvals', value: stats?.pendingApprovals || 0, icon: Activity, trend: '-5' },
-    { title: 'Active Vendors', value: stats?.activeVendors || 0, icon: TrendingUp, trend: '+1' },
+    { title: 'Total Spend', value: formatCurrency(stats?.invoices?.totalPaid || 0), icon: DollarSign, trend: '' },
+    { title: 'Active POs', value: stats?.purchaseOrders?.issued || 0, icon: FileText, trend: '' },
+    { title: 'Pending Approvals', value: stats?.approvals?.pending || 0, icon: Activity, trend: '' },
+    { title: 'Active Vendors', value: stats?.vendors?.active || 0, icon: TrendingUp, trend: '' },
   ];
 
   // Helper icon for missing import
@@ -76,10 +95,7 @@ export default function ReportsPage() {
                 </div>
               </div>
               <div className="mt-4 flex items-center text-sm">
-                <span className={stat.trend.startsWith('+') ? 'text-green-600 font-medium' : 'text-red-600 font-medium'}>
-                  {stat.trend}
-                </span>
-                <span className="text-muted-foreground ml-2">from last month</span>
+                <span className="text-muted-foreground ml-2">Currently</span>
               </div>
             </CardContent>
           </Card>

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authApi } from '../../api/authApi';
 import { Button } from '../../components/ui/Button';
@@ -15,7 +15,20 @@ export default function ForgotPasswordPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(120);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (step === 'otp' && timeLeft > 0) {
+      timer = setInterval(() => {
+        setTimeLeft((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [step, timeLeft]);
 
   const handleResetError = () => {
     setError('');
@@ -28,6 +41,7 @@ export default function ForgotPasswordPage() {
     setNewPassword('');
     setConfirmPassword('');
     setError('');
+    setTimeLeft(120);
   };
 
   const onSubmitEmail = async (e: React.FormEvent) => {
@@ -41,6 +55,7 @@ export default function ForgotPasswordPage() {
     try {
       await authApi.forgotPassword(email);
       setStep('otp');
+      setTimeLeft(120);
     } catch (err: any) {
       setError(err.message || 'Failed to send OTP');
     } finally {
@@ -52,6 +67,10 @@ export default function ForgotPasswordPage() {
     e.preventDefault();
     if (otp.length !== 6) {
       setError('OTP must be exactly 6 digits');
+      return;
+    }
+    if (timeLeft === 0) {
+      setError('OTP has expired. Please request a new one.');
       return;
     }
     handleResetError();
@@ -83,6 +102,19 @@ export default function ForgotPasswordPage() {
       navigate('/login');
     } catch (err: any) {
       setError(err.message || 'Failed to reset password');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    handleResetError();
+    setIsLoading(true);
+    try {
+      await authApi.forgotPassword(email);
+      setTimeLeft(120);
+    } catch (err: any) {
+      setError(err.message || 'Failed to resend OTP');
     } finally {
       setIsLoading(false);
     }
@@ -130,8 +162,30 @@ export default function ForgotPasswordPage() {
                 maxLength={6}
                 value={otp}
                 onChange={(e) => setOtp(e.target.value)}
+                disabled={timeLeft === 0}
               />
-              <Button type="submit" className="w-full mt-6" isLoading={isLoading}>
+              
+              <div className="flex justify-between items-center text-sm font-medium mt-2">
+                <span className={timeLeft === 0 ? "text-destructive" : "text-muted-foreground"}>
+                  {timeLeft > 0 ? (
+                    `Expires in 0${Math.floor(timeLeft / 60)}:${(timeLeft % 60).toString().padStart(2, '0')}`
+                  ) : (
+                    'OTP Expired'
+                  )}
+                </span>
+                {timeLeft === 0 && (
+                  <button 
+                    type="button" 
+                    onClick={handleResendOtp}
+                    disabled={isLoading}
+                    className="text-primary hover:underline cursor-pointer bg-transparent border-none p-0"
+                  >
+                    Resend OTP
+                  </button>
+                )}
+              </div>
+
+              <Button type="submit" className="w-full mt-6" isLoading={isLoading} disabled={timeLeft === 0}>
                 Verify OTP
               </Button>
               <Button type="button" variant="outline" className="w-full mt-2" onClick={handleCancel}>

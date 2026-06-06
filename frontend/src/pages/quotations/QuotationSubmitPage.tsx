@@ -71,16 +71,19 @@ export default function QuotationSubmitPage() {
         totalPrice: (prices[item.id] || 0) * item.quantity
       })) || [];
 
-      await quotationApi.submit({
+      const draft = await quotationApi.submit({
         rfqId: rfq.id,
         vendorId: vendor.id,
         validityDays,
         deliveryTimeline,
         notes,
-        status,
         totalAmount: calculateTotal(),
         items
       });
+      
+      if (status === 'submitted') {
+        await quotationApi.submitQuotation(draft.id);
+      }
       
       navigate('/quotations');
     } catch (err) {

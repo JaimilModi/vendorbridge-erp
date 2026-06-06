@@ -31,13 +31,13 @@ router.use(authenticate);
 
 const createSchema = z.object({
   companyName:  z.string().trim().min(2).max(255),
-  contactName:  z.string().trim().min(1).max(255).optional(),
-  email:        schemas.email.optional(),
-  phone:        z.string().trim().max(50).optional(),
-  address:      z.string().trim().max(1000).optional(),
-  category:     z.string().trim().max(100).optional(),
-  gstNumber:    z.string().trim().max(100).optional(),
-  rating:       z.number().min(0).max(5).optional(),
+  contactName:  z.string().trim().min(1).max(255).nullable().optional(),
+  email:        schemas.email.nullable().optional(),
+  phone:        z.string().trim().max(50).nullable().optional(),
+  address:      z.string().trim().max(1000).nullable().optional(),
+  category:     z.string().trim().max(100).nullable().optional(),
+  gstNumber:    z.string().trim().max(100).nullable().optional(),
+  rating:       z.number().min(0).max(5).nullable().optional(),
   status:       z.enum(['active', 'pending', 'inactive']).default('pending'),
 });
 

@@ -28,8 +28,11 @@ import POListPage from '../pages/purchase-orders/POListPage';
 import PODetailPage from '../pages/purchase-orders/PODetailPage';
 import InvoiceListPage from '../pages/invoices/InvoiceListPage';
 import InvoiceDetailPage from '../pages/invoices/InvoiceDetailPage';
+import PaymentListPage from '../pages/payments/PaymentListPage';
+import ReceiptListPage from '../pages/receipts/ReceiptListPage';
 import ReportsPage from '../pages/reports/ReportsPage';
 import ActivityLogPage from '../pages/activity/ActivityLogPage';
+import UserManagementPage from '../pages/admin/UserManagementPage';
 
 // Error Pages
 import NotFoundPage from '../pages/errors/NotFoundPage';
@@ -127,6 +130,24 @@ export const router = createBrowserRouter([
             ],
           },
 
+          // Payments
+          {
+            path: 'payments',
+            element: <RoleRoute allowedRoles={[ROLES.ADMIN, ROLES.PROCUREMENT_OFFICER, ROLES.MANAGER, ROLES.VENDOR]} />,
+            children: [
+              { index: true, element: <PaymentListPage /> },
+            ],
+          },
+
+          // Receipts
+          {
+            path: 'receipts',
+            element: <RoleRoute allowedRoles={[ROLES.ADMIN, ROLES.PROCUREMENT_OFFICER, ROLES.MANAGER, ROLES.VENDOR]} />,
+            children: [
+              { index: true, element: <ReceiptListPage /> },
+            ],
+          },
+
           // Analytics & Logs
           {
             element: <RoleRoute allowedRoles={[ROLES.ADMIN, ROLES.MANAGER]} />,
@@ -134,7 +155,10 @@ export const router = createBrowserRouter([
           },
           {
             element: <RoleRoute allowedRoles={[ROLES.ADMIN]} />,
-            children: [{ path: 'activity', element: <ActivityLogPage /> }],
+            children: [
+              { path: 'activity', element: <ActivityLogPage /> },
+              { path: 'users', element: <UserManagementPage /> }
+            ],
           },
         ],
       },

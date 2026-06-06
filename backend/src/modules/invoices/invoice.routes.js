@@ -7,6 +7,7 @@
  * GET    /api/invoices/my     → vendor's own invoices (vendor)
  * GET    /api/invoices/:id    → invoice detail (all authenticated)
  * POST   /api/invoices        → vendor generates invoice from an issued PO
+ * POST   /api/invoices/:id/email → email the invoice
  * PATCH  /api/invoices/:id/status → approve / reject / paid (admin, proc_officer)
  */
 
@@ -86,6 +87,13 @@ router.patch(
   allowRoles('admin', 'procurement_officer'),
   validate({ params: idParams, body: statusSchema }),
   controller.updateStatus
+);
+
+router.post(
+  '/:id/email',
+  allowRoles('admin', 'procurement_officer', 'manager', 'vendor'),
+  validate({ params: idParams }),
+  controller.emailInvoice
 );
 
 module.exports = router;

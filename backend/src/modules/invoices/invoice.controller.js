@@ -38,4 +38,10 @@ const updateStatus = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-module.exports = { getAll, getMy, getById, create, updateStatus };
+const emailInvoice = async (req, res, next) => {
+  try {
+    return ok(res, await invoiceService.emailInvoice(req.params.id, req.user), 'Invoice emailed successfully.');
+  } catch (err) { next(err); }
+};
+
+module.exports = { getAll, getMy, getById, create, updateStatus, emailInvoice };

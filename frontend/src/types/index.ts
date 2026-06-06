@@ -1,4 +1,4 @@
-import { Role, VendorStatus, RfqStatus, QuotationStatus, ApprovalStatus, PoStatus, InvoiceStatus } from '../constants';
+import { Role, VendorStatus, RfqStatus, QuotationStatus, ApprovalStatus, PoStatus, InvoiceStatus, PaymentStatus, PaymentMethod } from '../constants';
 
 export interface User {
   id: string;
@@ -155,4 +155,33 @@ export interface ActivityLog {
   meta?: any;
   createdAt: string;
   user?: User; // For display purposes
+}
+
+export interface Payment {
+  id: string;
+  paymentNumber: string;
+  invoiceId: string;
+  vendorId: string;
+  amount: number;
+  paymentMethod: PaymentMethod;
+  status: PaymentStatus;
+  paymentDate: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+  vendor?: Vendor;
+  invoice?: Invoice;
+}
+
+export interface Receipt {
+  id: string;
+  receiptNumber: string;
+  paymentId: string;
+  invoiceId: string;
+  vendorId: string;
+  amountReceived: number;
+  issuedAt: string;
+  vendor?: Vendor;
+  payment?: Payment;
+  invoice?: Invoice;
 }

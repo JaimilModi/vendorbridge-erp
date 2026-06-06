@@ -1,29 +1,45 @@
-import { mockDb, delay } from './mockDb';
+import { apiClient } from './apiClient';
 
 export const dashboardApi = {
   getSummary: async () => {
-    await delay();
-    return {
-      openRfqs: mockDb.rfqs.filter(r => r.status === 'published').length,
-      activeVendors: mockDb.vendors.filter(v => v.status === 'active').length,
-      pendingApprovals: mockDb.approvals.filter(a => a.status === 'pending').length,
-      activePOs: mockDb.purchaseOrders.filter(p => p.status === 'issued').length,
-    };
+    try {
+      return await apiClient.get('/reports/summary');
+    } catch (err) {
+      return {};
+    }
+  },
+  
+  getMonthlyTrend: async (year?: number) => {
+    try {
+      return await apiClient.get(`/reports/monthly-trend${year ? `?year=${year}` : ''}`);
+    } catch (err) {
+      return { data: [] };
+    }
+  },
+
+  getVendorPerformance: async () => {
+    try {
+      return await apiClient.get('/reports/vendor-performance');
+    } catch (err) {
+      return { data: [] };
+    }
   },
   
   getActivity: async () => {
-    await delay();
-    return mockDb.activityLogs.slice(0, 10).map(log => {
-      const user = mockDb.users.find(u => u.id === log.userId);
-      return { ...log, user };
-    });
+    try {
+      const res = await apiClient.get('/activity-logs?limit=10');
+      return res; // apiClient.get already extracts .data
+    } catch (err) {
+      return [];
+    }
   },
   
   getAllActivity: async () => {
-    await delay();
-    return mockDb.activityLogs.map(log => {
-      const user = mockDb.users.find(u => u.id === log.userId);
-      return { ...log, user };
-    });
+    try {
+      const res = await apiClient.get('/activity-logs?limit=100');
+      return res; // apiClient.get already extracts .data
+    } catch (err) {
+      return [];
+    }
   }
 };

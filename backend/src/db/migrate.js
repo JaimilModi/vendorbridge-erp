@@ -50,6 +50,14 @@ DO $$ BEGIN
   CREATE TYPE invoice_status AS ENUM ('pending', 'approved', 'paid', 'rejected');
 EXCEPTION WHEN duplicate_object THEN NULL; END $$;
 
+DO $$ BEGIN
+  CREATE TYPE payment_method AS ENUM ('bank_transfer', 'credit_card', 'cheque', 'cash');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
+DO $$ BEGIN
+  CREATE TYPE payment_status AS ENUM ('processing', 'completed', 'failed');
+EXCEPTION WHEN duplicate_object THEN NULL; END $$;
+
 -- ─────────────────────────────────────────────────────────────────────────────
 -- SEQUENCES for document number generation
 -- ─────────────────────────────────────────────────────────────────────────────
@@ -57,6 +65,8 @@ CREATE SEQUENCE IF NOT EXISTS rfq_number_seq START 1;
 CREATE SEQUENCE IF NOT EXISTS quotation_number_seq START 1;
 CREATE SEQUENCE IF NOT EXISTS po_number_seq START 1;
 CREATE SEQUENCE IF NOT EXISTS invoice_number_seq START 1;
+CREATE SEQUENCE IF NOT EXISTS payment_number_seq START 1;
+CREATE SEQUENCE IF NOT EXISTS receipt_number_seq START 1;
 
 -- ─────────────────────────────────────────────────────────────────────────────
 -- USERS
@@ -221,6 +231,36 @@ CREATE TABLE IF NOT EXISTS invoice_items (
 );
 
 -- ─────────────────────────────────────────────────────────────────────────────
+-- PAYMENTS
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS payments (
+  id             UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  payment_number VARCHAR(50) NOT NULL UNIQUE,
+  invoice_id     UUID NOT NULL REFERENCES invoices(id),
+  vendor_id      UUID NOT NULL REFERENCES vendors(id),
+  amount         DECIMAL(15,2) NOT NULL,
+  payment_method payment_method DEFAULT 'bank_transfer',
+  status         payment_status DEFAULT 'processing',
+  payment_date   TIMESTAMPTZ DEFAULT NOW(),
+  notes          TEXT,
+  created_at     TIMESTAMPTZ DEFAULT NOW(),
+  updated_at     TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─────────────────────────────────────────────────────────────────────────────
+-- RECEIPTS
+-- ─────────────────────────────────────────────────────────────────────────────
+CREATE TABLE IF NOT EXISTS receipts (
+  id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  receipt_number  VARCHAR(50) NOT NULL UNIQUE,
+  payment_id      UUID NOT NULL UNIQUE REFERENCES payments(id),
+  invoice_id      UUID NOT NULL REFERENCES invoices(id),
+  vendor_id       UUID NOT NULL REFERENCES vendors(id),
+  amount_received DECIMAL(15,2) NOT NULL,
+  issued_at       TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ─────────────────────────────────────────────────────────────────────────────
 -- ACTIVITY LOGS
 -- ─────────────────────────────────────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS activity_logs (
@@ -243,6 +283,8 @@ CREATE INDEX IF NOT EXISTS idx_quotations_vendor_id ON quotations(vendor_id);
 CREATE INDEX IF NOT EXISTS idx_approvals_status ON approvals(status);
 CREATE INDEX IF NOT EXISTS idx_po_vendor_id ON purchase_orders(vendor_id);
 CREATE INDEX IF NOT EXISTS idx_invoices_vendor_id ON invoices(vendor_id);
+CREATE INDEX IF NOT EXISTS idx_payments_vendor_id ON payments(vendor_id);
+CREATE INDEX IF NOT EXISTS idx_receipts_vendor_id ON receipts(vendor_id);
 CREATE INDEX IF NOT EXISTS idx_activity_logs_entity ON activity_logs(entity_type, entity_id);
 CREATE INDEX IF NOT EXISTS idx_activity_logs_created_at ON activity_logs(created_at DESC);
 `;

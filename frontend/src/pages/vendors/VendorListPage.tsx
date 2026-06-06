@@ -42,10 +42,31 @@ export default function VendorListPage() {
 
   const onEditSubmit = async (data: Partial<Vendor>) => {
     if (!editingVendor) return;
-    // Mock API call to update vendor
-    const updated = vendors.map(v => v.id === editingVendor.id ? { ...v, ...data } : v);
-    setVendors(updated);
-    setIsEditModalOpen(false);
+    
+    // Clean up data for Zod validation: convert empty strings to undefined
+    const cleanedData = { ...data };
+    if (cleanedData.email === "") cleanedData.email = undefined;
+    if (cleanedData.phone === "") cleanedData.phone = undefined;
+    if (cleanedData.gstNumber === "") cleanedData.gstNumber = undefined;
+    if (cleanedData.category === "") cleanedData.category = undefined;
+    
+    try {
+      // Update basic details
+      const updatedVendor = await vendorApi.update(editingVendor.id, cleanedData);
+      
+      // If status changed, update status separately
+      let finalVendor = updatedVendor;
+      if (data.status && data.status !== editingVendor.status) {
+        finalVendor = await vendorApi.updateStatus(editingVendor.id, data.status);
+      }
+      
+      const updated = vendors.map(v => v.id === editingVendor.id ? { ...v, ...finalVendor } : v);
+      setVendors(updated);
+      setIsEditModalOpen(false);
+    } catch (error: any) {
+      console.error('Failed to update vendor', error);
+      alert(error.message || 'Failed to update vendor. Please check all fields.');
+    }
   };
 
   const filteredVendors = vendors.filter(v => {
@@ -158,6 +179,7 @@ export default function VendorListPage() {
       >
         <form onSubmit={handleSubmit(onEditSubmit)} className="space-y-4 py-2">
           <Input label="Company Name" {...register('companyName')} />
+          <Input label="Business Address" {...register('address')} />
           <div className="grid grid-cols-2 gap-4">
             <Input label="Category" {...register('category')} />
             <Input label="GST Number" {...register('gstNumber')} />

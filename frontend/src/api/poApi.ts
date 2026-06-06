@@ -1,22 +1,16 @@
-import { mockDb, delay } from './mockDb';
+import { apiClient } from './apiClient';
 import { PurchaseOrder } from '../types';
 
 export const poApi = {
   getAll: async (): Promise<PurchaseOrder[]> => {
-    await delay();
-    return mockDb.purchaseOrders.map(po => ({
-      ...po,
-      vendor: mockDb.vendors.find(v => v.id === po.vendorId)
-    }));
+    const userStr = localStorage.getItem('auth-storage');
+    if (userStr && userStr.includes('"role":"vendor"')) {
+      return await apiClient.get('/purchase-orders/vendor');
+    }
+    return await apiClient.get('/purchase-orders');
   },
 
   getById: async (id: string): Promise<PurchaseOrder> => {
-    await delay();
-    const po = mockDb.purchaseOrders.find(po => po.id === id);
-    if (!po) throw new Error('Purchase Order not found');
-    return {
-      ...po,
-      vendor: mockDb.vendors.find(v => v.id === po.vendorId)
-    };
+    return await apiClient.get(`/purchase-orders/${id}`);
   }
 };

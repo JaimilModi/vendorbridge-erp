@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { invoiceApi } from '../../api/invoiceApi';
+import { paymentApi } from '../../api/paymentApi';
 import { Invoice } from '../../types';
 import { PageHeader } from '../../components/layout/PageHeader';
 import { Card, CardContent } from '../../components/ui/Card';
@@ -9,6 +10,8 @@ import { Button } from '../../components/ui/Button';
 import { formatCurrency } from '../../lib/utils';
 import { useAuthStore } from '../../store/authStore';
 import { Printer, CheckCircle, XCircle, CreditCard, Download, Mail } from 'lucide-react';
+import html2canvas from 'html2canvas';
+import { jsPDF } from 'jspdf';
 
 export default function InvoiceDetailPage() {
   const { id } = useParams();
@@ -31,12 +34,39 @@ export default function InvoiceDetailPage() {
     window.print();
   };
 
-  const handleDownload = () => {
-    alert('Mock: Downloading Invoice PDF...');
+  const handleDownload = async () => {
+    const input = document.getElementById('invoice-content');
+    if (!input) return;
+    
+    try {
+      setProcessing(true);
+      const canvas = await html2canvas(input, { scale: 2 });
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+      pdf.save(`Invoice_${invoice?.invoiceNumber}.pdf`);
+    } catch (err) {
+      console.error('Error generating PDF', err);
+    } finally {
+      setProcessing(false);
+    }
   };
 
-  const handleEmail = () => {
-    alert('Mock: Emailing Invoice to VendorBridge Accounts Payable...');
+  const handleEmail = async () => {
+    if (!invoice) return;
+    try {
+      setProcessing(true);
+      await invoiceApi.emailInvoice(invoice.id);
+      alert('Invoice emailed successfully!');
+    } catch (err) {
+      console.error('Error emailing invoice', err);
+      alert('Failed to email invoice');
+    } finally {
+      setProcessing(false);
+    }
   };
 
   const handleStatusUpdate = async (status: 'approved' | 'rejected' | 'paid') => {
@@ -47,6 +77,20 @@ export default function InvoiceDetailPage() {
       setInvoice({ ...invoice, status });
     } catch (err) {
       console.error(err);
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handleInitiatePayment = async () => {
+    if (!invoice) return;
+    setProcessing(true);
+    try {
+      await paymentApi.create({ invoiceId: invoice.id });
+      navigate('/payments');
+    } catch (err) {
+      console.error(err);
+      alert('Failed to initiate payment.');
     } finally {
       setProcessing(false);
     }
@@ -67,10 +111,10 @@ export default function InvoiceDetailPage() {
           actions={
             <>
               <Button variant="outline" onClick={() => navigate('/invoices')}>Back</Button>
-              <Button variant="outline" onClick={handleDownload}>
+              <Button variant="outline" onClick={handleDownload} isLoading={processing}>
                 <Download className="mr-2 h-4 w-4" /> PDF
               </Button>
-              <Button variant="outline" onClick={handleEmail}>
+              <Button variant="outline" onClick={handleEmail} isLoading={processing}>
                 <Mail className="mr-2 h-4 w-4" /> Email
               </Button>
               <Button variant="outline" onClick={handlePrint}>
@@ -89,8 +133,8 @@ export default function InvoiceDetailPage() {
               )}
               
               {isInternal && isApproved && (
-                <Button onClick={() => handleStatusUpdate('paid')} isLoading={processing}>
-                  <CreditCard className="mr-2 h-4 w-4" /> Mark as Paid
+                <Button onClick={handleInitiatePayment} isLoading={processing}>
+                  <CreditCard className="mr-2 h-4 w-4" /> Initiate Payment
                 </Button>
               )}
             </>
@@ -98,7 +142,7 @@ export default function InvoiceDetailPage() {
         />
       </div>
 
-      <Card className="shadow-soft bg-white print:shadow-none print:border-none print:m-0 print:p-0">
+      <Card id="invoice-content" className="shadow-soft bg-white print:shadow-none print:border-none print:m-0 print:p-0">
         <CardContent className="p-8 sm:p-12">
           {/* Header */}
           <div className="flex flex-col sm:flex-row justify-between pb-8 border-b border-border">

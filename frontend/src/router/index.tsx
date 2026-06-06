@@ -8,6 +8,7 @@ import AppShell from '../components/layout/AppShell';
 import LandingPage from '../pages/auth/LandingPage';
 import LoginPage from '../pages/auth/LoginPage';
 import SignupPage from '../pages/auth/SignupPage';
+import ForgotPasswordPage from '../pages/auth/ForgotPasswordPage';
 
 // Feature Pages
 import DashboardPage from '../pages/dashboard/DashboardPage';
@@ -43,6 +44,7 @@ export const router = createBrowserRouter([
   { path: '/', element: <LandingPage /> },
   { path: '/login', element: <LoginPage /> },
   { path: '/signup', element: <SignupPage /> },
+  { path: '/forgot-password', element: <ForgotPasswordPage /> },
   { path: '/unauthorized', element: <UnauthorizedPage /> },
 
   // Protected App Routes

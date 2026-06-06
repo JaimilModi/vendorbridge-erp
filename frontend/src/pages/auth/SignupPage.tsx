@@ -54,10 +54,9 @@ export default function SignupPage() {
         <span className="text-2xl font-bold tracking-tight text-primary">VendorBridge</span>
       </Link>
       
-      <Card className="w-full max-w-md shadow-soft">
+      <Card className="w-full max-w-lg shadow-soft">
         <CardHeader className="space-y-1 text-center pb-6">
           <CardTitle className="text-2xl font-bold">Register Account</CardTitle>
-          <p className="text-sm text-muted-foreground">Create an account to access VendorBridge</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
@@ -70,13 +69,11 @@ export default function SignupPage() {
             <div className="grid grid-cols-2 gap-4">
               <Input 
                 label="Full Name" 
-                placeholder="John Doe" 
                 {...register('fullName')} 
                 error={errors.fullName?.message} 
               />
               <Input 
                 label="Company Name (Vendors Only)" 
-                placeholder="Acme Corp" 
                 {...register('companyName')} 
                 error={errors.companyName?.message} 
               />
@@ -100,7 +97,6 @@ export default function SignupPage() {
             <Input 
               label="Email" 
               type="email"
-              placeholder="john@acmecorp.com" 
               {...register('email')} 
               error={errors.email?.message} 
             />
@@ -108,7 +104,6 @@ export default function SignupPage() {
             <Input 
               label="Password" 
               type="password" 
-              placeholder="••••••••" 
               {...register('password')} 
               error={errors.password?.message} 
             />

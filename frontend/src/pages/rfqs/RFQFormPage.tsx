@@ -8,7 +8,7 @@ import { rfqApi } from '../../api/rfqApi';
 import { vendorApi } from '../../api/vendorApi';
 import { useAuthStore } from '../../store/authStore';
 import { Vendor } from '../../types';
-import { UploadCloud } from 'lucide-react';
+import { UploadCloud, Trash2 } from 'lucide-react';
 
 export default function RFQFormPage() {
   const navigate = useNavigate();
@@ -23,6 +23,7 @@ export default function RFQFormPage() {
   const [deadline, setDeadline] = useState('');
   const [items, setItems] = useState([{ itemName: '', quantity: 1, unit: 'pcs', estimatedPrice: 0 }]);
   const [selectedVendors, setSelectedVendors] = useState<string[]>([]);
+  const [attachments, setAttachments] = useState<File[]>([]);
 
   useEffect(() => {
     vendorApi.getAll().then(data => {
@@ -38,6 +39,21 @@ export default function RFQFormPage() {
     const newItems = [...items];
     newItems[index] = { ...newItems[index], [field]: value };
     setItems(newItems);
+  };
+
+  const handleRemoveItem = (index: number) => {
+    if (items.length > 1) {
+      const newItems = [...items];
+      newItems.splice(index, 1);
+      setItems(newItems);
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      setAttachments([...attachments, ...newFiles]);
+    }
   };
 
   const handleVendorToggle = (vendorId: string) => {
@@ -98,11 +114,17 @@ export default function RFQFormPage() {
 
             <div className="space-y-1.5 pt-2">
               <label className="text-sm font-medium leading-none">Attachments</label>
-              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-border border-dashed rounded-md bg-secondary/20 hover:bg-secondary/40 transition-colors cursor-pointer">
-                <div className="space-y-1 text-center">
+              <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-border border-dashed rounded-md bg-secondary/20 hover:bg-secondary/40 transition-colors relative">
+                <input 
+                  type="file" 
+                  multiple 
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  onChange={handleFileChange}
+                />
+                <div className="space-y-1 text-center pointer-events-none">
                   <UploadCloud className="mx-auto h-8 w-8 text-muted-foreground" />
-                  <div className="flex text-sm text-muted-foreground">
-                    <span className="relative cursor-pointer rounded-md font-medium text-primary hover:text-primary/80">
+                  <div className="flex text-sm text-muted-foreground justify-center">
+                    <span className="font-medium text-primary">
                       Upload files
                     </span>
                     <p className="pl-1">or drag and drop</p>
@@ -110,6 +132,26 @@ export default function RFQFormPage() {
                   <p className="text-xs text-muted-foreground">PDF, DOCX, XLSX up to 10MB</p>
                 </div>
               </div>
+              {attachments.length > 0 && (
+                <ul className="mt-2 text-sm text-muted-foreground space-y-1">
+                  {attachments.map((file, i) => (
+                    <li key={i} className="flex justify-between border-b border-border pb-1">
+                      <span>{file.name}</span>
+                      <button 
+                        type="button" 
+                        onClick={() => {
+                          const newAtt = [...attachments];
+                          newAtt.splice(i, 1);
+                          setAttachments(newAtt);
+                        }}
+                        className="text-red-500 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </CardContent>
         </Card>
@@ -135,6 +177,11 @@ export default function RFQFormPage() {
                   </div>
                   <div className="w-32">
                     <Input type="number" placeholder="Est. Price" value={item.estimatedPrice} onChange={e => handleItemChange(idx, 'estimatedPrice', Number(e.target.value))} />
+                  </div>
+                  <div className="w-10 flex justify-center mt-[24px]">
+                    <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-red-500 hover:text-red-700 hover:bg-red-50" onClick={() => handleRemoveItem(idx)} disabled={items.length === 1}>
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
               ))}

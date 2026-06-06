@@ -231,34 +231,36 @@ export default function DashboardPage() {
           )}
 
           {/* Activity Feed */}
-          <Card className="shadow-soft">
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle>Recent Activity</CardTitle>
-              {!isVendor && <Button variant="outline" size="sm" onClick={() => navigate('/activity')}>View All</Button>}
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6 mt-2">
-                {activity.map((log) => (
-                  <div key={log.id} className="flex items-start space-x-4">
-                    <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center shrink-0 border border-border">
-                      <ActivityIcon action={log.action} />
+          {!isVendor && (
+            <Card className="shadow-soft">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <CardTitle>Recent Activity</CardTitle>
+                <Button variant="outline" size="sm" onClick={() => navigate('/activity')}>View All</Button>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6 mt-2">
+                  {activity.map((log) => (
+                    <div key={log.id} className="flex items-start space-x-4">
+                      <div className="h-8 w-8 rounded-full bg-secondary flex items-center justify-center shrink-0 border border-border">
+                        <ActivityIcon action={log.action} />
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-sm font-medium leading-none">
+                          {log.user?.fullName || 'System'} <span className="text-muted-foreground font-normal">{formatAction(log.action)}</span> {log.entityId}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {new Date(log.createdAt).toLocaleDateString()} at {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                        </p>
+                      </div>
                     </div>
-                    <div className="space-y-1">
-                      <p className="text-sm font-medium leading-none">
-                        {log.user?.fullName || 'System'} <span className="text-muted-foreground font-normal">{formatAction(log.action)}</span> {log.entityId}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(log.createdAt).toLocaleDateString()} at {new Date(log.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-                {activity.length === 0 && (
-                  <p className="text-sm text-muted-foreground">No recent activity.</p>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+                  ))}
+                  {activity.length === 0 && (
+                    <p className="text-sm text-muted-foreground">No recent activity.</p>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
       </div>
     </div>

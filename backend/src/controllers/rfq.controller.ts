@@ -5,7 +5,7 @@ import { AuthRequest } from '../middleware/auth';
 export class RFQController {
   static async getAll(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const rfqs = await RFQService.getAll();
+      const rfqs = await RFQService.getAll(req.user?.role);
       return res.status(200).json(rfqs);
     } catch (error: any) {
       return res.status(500).json({ message: error.message });
@@ -14,7 +14,7 @@ export class RFQController {
 
   static async getById(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const rfq = await RFQService.getById(req.params.id);
+      const rfq = await RFQService.getById(req.params.id, req.user?.role);
       if (!rfq) {
         return res.status(404).json({ message: 'RFQ not found' });
       }

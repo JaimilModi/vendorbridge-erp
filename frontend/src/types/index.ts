@@ -55,6 +55,7 @@ export interface RFQ {
   createdById: string;
   createdBy?: Partial<User>;
   items?: RFQItem[];
+  quotations?: Quotation[];
   createdAt: string;
   updatedAt: string;
 }

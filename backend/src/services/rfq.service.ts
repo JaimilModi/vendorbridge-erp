@@ -1,8 +1,10 @@
 import { prisma } from '../config/db';
 
 export class RFQService {
-  static async getAll() {
+  static async getAll(userRole?: string) {
+    const where = userRole === 'VENDOR' ? { status: 'OPEN' as const } : {};
     return prisma.rFQ.findMany({
+      where,
       include: {
         items: true,
         createdBy: {
@@ -17,8 +19,8 @@ export class RFQService {
     });
   }
 
-  static async getById(id: string) {
-    return prisma.rFQ.findUnique({
+  static async getById(id: string, userRole?: string) {
+    const rfq = await prisma.rFQ.findUnique({
       where: { id },
       include: {
         items: true,
@@ -30,9 +32,19 @@ export class RFQService {
             lastName: true,
           },
         },
-        quotations: true,
+        quotations: {
+          include: {
+            vendor: true,
+          },
+        },
       },
     });
+
+    if (rfq && userRole === 'VENDOR' && rfq.status !== 'OPEN') {
+      throw new Error('Access denied: RFQ is not open');
+    }
+
+    return rfq;
   }
 
   static async create(
@@ -60,7 +72,35 @@ export class RFQService {
     });
   }
 
-  static async update(id: string, data: any) {
+  static async update(
+    id: string,
+    data: {
+      title: string;
+      description?: string;
+      status: 'DRAFT' | 'OPEN' | 'CLOSED' | 'AWARDED';
+      deadline: string;
+      items?: { productName: string; description?: string; quantity: number; uom: string }[];
+    }
+  ) {
+    if (data.items) {
+      return prisma.$transaction(async (tx) => {
+        await tx.rFQItem.deleteMany({ where: { rfqId: id } });
+        return tx.rFQ.update({
+          where: { id },
+          data: {
+            title: data.title,
+            description: data.description,
+            status: data.status,
+            deadline: new Date(data.deadline),
+            items: {
+              create: data.items,
+            },
+          },
+          include: { items: true },
+        });
+      });
+    }
+
     return prisma.rFQ.update({
       where: { id },
       data: {
@@ -69,6 +109,7 @@ export class RFQService {
         status: data.status,
         deadline: data.deadline ? new Date(data.deadline) : undefined,
       },
+      include: { items: true },
     });
   }
 

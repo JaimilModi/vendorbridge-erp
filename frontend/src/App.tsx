@@ -8,6 +8,7 @@ import Signup from './pages/Signup';
 import Dashboard from './pages/Dashboard';
 import Vendors from './pages/Vendors';
 import RFQs from './pages/RFQs';
+import { RFQDetails } from './pages/RFQDetails';
 import Quotations from './pages/Quotations';
 import Approvals from './pages/Approvals';
 import PurchaseOrders from './pages/PurchaseOrders';
@@ -46,6 +47,7 @@ const App: React.FC = () => {
 
             <Route path="vendors" element={<ProtectedRoute allowedRoles={['ADMIN', 'PROCUREMENT_OFFICER']}><Vendors /></ProtectedRoute>} />
             <Route path="rfqs" element={<ProtectedRoute allowedRoles={['PROCUREMENT_OFFICER', 'VENDOR']}><RFQs /></ProtectedRoute>} />
+            <Route path="rfqs/:id" element={<ProtectedRoute allowedRoles={['PROCUREMENT_OFFICER', 'VENDOR', 'ADMIN']}><RFQDetails /></ProtectedRoute>} />
             <Route path="quotations" element={<ProtectedRoute allowedRoles={['VENDOR']}><Quotations /></ProtectedRoute>} />
             <Route path="approvals" element={<ProtectedRoute allowedRoles={['MANAGER']}><Approvals /></ProtectedRoute>} />
             <Route path="purchase-orders" element={<ProtectedRoute allowedRoles={['PROCUREMENT_OFFICER', 'VENDOR']}><PurchaseOrders /></ProtectedRoute>} />

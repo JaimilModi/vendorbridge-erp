@@ -96,6 +96,25 @@ export class DashboardService {
         where: { vendorId }
       });
 
+      // Vendor top items by sales spend
+      const vendorPoItems = await prisma.purchaseOrderItem.findMany({
+        where: { po: { vendorId, status: { in: ['ISSUED', 'COMPLETED'] } } },
+        select: {
+          productName: true,
+          totalPrice: true
+        }
+      });
+      const vendorProductSpendMap: Record<string, number> = {};
+      vendorPoItems.forEach(item => {
+        const name = item.productName || 'Unnamed Item';
+        const amt = Number(item.totalPrice);
+        vendorProductSpendMap[name] = (vendorProductSpendMap[name] || 0) + amt;
+      });
+      const spendByProductVendor = Object.entries(vendorProductSpendMap).map(([name, value]) => ({
+        name,
+        value
+      })).sort((a, b) => b.value - a.value).slice(0, 5);
+
       return {
         role,
         metrics: {
@@ -121,7 +140,9 @@ export class DashboardService {
           purchaseOrdersPerMonth: this.groupTimeSeries(poRaw, monthsTemplate),
           invoicesPerMonth: this.groupTimeSeries(invoicesRaw, monthsTemplate),
           invoiceStatusDistribution: invoiceStatuses.map(item => ({ name: item.status, value: item._count })),
-          purchaseOrderStatusDistribution: poStatuses.map(item => ({ name: item.status, value: item._count }))
+          purchaseOrderStatusDistribution: poStatuses.map(item => ({ name: item.status, value: item._count })),
+          spendByVendor: [],
+          spendByProduct: spendByProductVendor
         }
       };
     } else {
@@ -181,6 +202,44 @@ export class DashboardService {
         _count: true
       });
 
+      // Spend by Vendor (Top 5)
+      const poGroupedByVendor = await prisma.purchaseOrder.findMany({
+        where: { status: { in: ['ISSUED', 'COMPLETED'] } },
+        select: {
+          totalAmount: true,
+          vendor: { select: { name: true } }
+        }
+      });
+      const vendorSpendMap: Record<string, number> = {};
+      poGroupedByVendor.forEach(po => {
+        const name = po.vendor?.name || 'Unknown Vendor';
+        const amt = Number(po.totalAmount);
+        vendorSpendMap[name] = (vendorSpendMap[name] || 0) + amt;
+      });
+      const spendByVendor = Object.entries(vendorSpendMap).map(([name, spend]) => ({
+        name,
+        spend
+      })).sort((a, b) => b.spend - a.spend).slice(0, 5);
+
+      // Spend by Product/Item (Top 5)
+      const poItems = await prisma.purchaseOrderItem.findMany({
+        where: { po: { status: { in: ['ISSUED', 'COMPLETED'] } } },
+        select: {
+          productName: true,
+          totalPrice: true
+        }
+      });
+      const productSpendMap: Record<string, number> = {};
+      poItems.forEach(item => {
+        const name = item.productName || 'Unnamed Item';
+        const amt = Number(item.totalPrice);
+        productSpendMap[name] = (productSpendMap[name] || 0) + amt;
+      });
+      const spendByProduct = Object.entries(productSpendMap).map(([name, value]) => ({
+        name,
+        value
+      })).sort((a, b) => b.value - a.value).slice(0, 5);
+
       return {
         role,
         metrics: {
@@ -206,7 +265,9 @@ export class DashboardService {
           purchaseOrdersPerMonth: this.groupTimeSeries(poRaw, monthsTemplate),
           invoicesPerMonth: this.groupTimeSeries(invoicesRaw, monthsTemplate),
           invoiceStatusDistribution: invoiceStatuses.map(item => ({ name: item.status, value: item._count })),
-          purchaseOrderStatusDistribution: poStatuses.map(item => ({ name: item.status, value: item._count }))
+          purchaseOrderStatusDistribution: poStatuses.map(item => ({ name: item.status, value: item._count })),
+          spendByVendor,
+          spendByProduct
         }
       };
     }
@@ -240,7 +301,9 @@ export class DashboardService {
         purchaseOrdersPerMonth: emptySeries,
         invoicesPerMonth: emptySeries,
         invoiceStatusDistribution: [],
-        purchaseOrderStatusDistribution: []
+        purchaseOrderStatusDistribution: [],
+        spendByVendor: [],
+        spendByProduct: []
       }
     };
   }

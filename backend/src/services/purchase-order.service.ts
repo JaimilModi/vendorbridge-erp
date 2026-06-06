@@ -104,7 +104,7 @@ export class PurchaseOrderService {
     // console.log('Quotation Items:', quotation.items);
 
     const itemsData = (quotation.items || []).map((item) => {
-      const productName = item.rfqItem?.productName || 'Line Item';
+      const productName = item.rfqItem?.productName || 'Unnamed Item';
       const description = item.rfqItem?.description || null;
       const quantity = item.rfqItem?.quantity || 0;
       const unitPrice = Number(item.unitPrice);

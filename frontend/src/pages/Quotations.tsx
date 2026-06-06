@@ -336,7 +336,7 @@ const Quotations: React.FC = () => {
                     key: 'timeline',
                     render: (_: any, q: Quotation) => {
                       const timelines = q.items?.map(i => {
-                        const productName = i.rfqItem?.productName || q.rfq?.items?.find(ri => ri.id === i.rfqItemId)?.productName || 'Line Item';
+                        const productName = i.rfqItem?.productName || q.rfq?.items?.find(ri => ri.id === i.rfqItemId)?.productName || 'Unnamed Item';
                         return `${productName}: ${i.deliveryTimeline || 'N/A'}`;
                       }) || [];
                       return (

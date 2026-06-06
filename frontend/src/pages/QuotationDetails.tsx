@@ -66,7 +66,7 @@ const QuotationDetails: React.FC = () => {
       validityDate: dayjs(quotation.validityDate),
       items: quotation.items?.map(item => ({
         rfqItemId: item.rfqItemId,
-        productName: item.rfqItem?.productName || 'Line Item',
+        productName: item.rfqItem?.productName || 'Unnamed Item',
         quantity: item.rfqItem?.quantity || 1,
         uom: item.rfqItem?.uom || 'pcs',
         unitPrice: item.unitPrice,
@@ -128,7 +128,7 @@ const QuotationDetails: React.FC = () => {
       title: 'Product Name',
       dataIndex: ['rfqItem', 'productName'],
       key: 'productName',
-      render: (val: string, record: QuotationItem) => val || record.rfqItem?.productName || 'Line Item',
+      render: (val: string, record: QuotationItem) => val || record.rfqItem?.productName || 'Unnamed Item',
     },
     {
       title: 'Description',

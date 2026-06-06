@@ -31,6 +31,7 @@ The platform enables procurement teams, vendors, managers, and administrators to
 
 ---
 
+
 ## RFQ (Request for Quotation) Management
 
 * Create RFQs

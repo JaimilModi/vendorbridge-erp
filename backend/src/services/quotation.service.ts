@@ -21,8 +21,13 @@ export class QuotationService {
             rfqItem: true,
           },
         },
-        rfq: true,
+        rfq: {
+          include: {
+            items: true,
+          },
+        },
         vendor: true,
+        purchaseOrders: true,
       },
     });
   }
@@ -42,7 +47,19 @@ export class QuotationService {
           },
         },
         vendor: true,
-        approvals: true,
+        purchaseOrders: true,
+        approvals: {
+          include: {
+            approvedBy: {
+              select: {
+                id: true,
+                firstName: true,
+                lastName: true,
+                email: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -106,20 +123,27 @@ export class QuotationService {
       });
     }
 
-    return prisma.quotation.create({
-      data: {
-        rfqId: data.rfqId,
-        vendorId,
-        validityDate: new Date(data.validityDate),
-        totalAmount,
-        items: {
-          create: itemsData,
-        },
-      },
+  return prisma.quotation.create({
+  data: {
+    rfqId: data.rfqId,
+    vendorId,
+    validityDate: new Date(data.validityDate),
+    totalAmount,
+
+    status: 'SUBMITTED',
+
+    items: {
+      create: itemsData,
+    },
+  },
+  include: {
+    items: {
       include: {
-        items: true,
+        rfqItem: true,
       },
-    });
+    },
+  },
+});
   }
 
   static async update(
@@ -186,7 +210,11 @@ export class QuotationService {
           },
         },
         include: {
-          items: true,
+          items: {
+            include: {
+              rfqItem: true,
+            },
+          },
         },
       });
     });

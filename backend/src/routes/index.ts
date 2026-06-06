@@ -4,7 +4,7 @@ import vendorRoutes from './vendor.routes';
 import rfqRoutes from './rfq.routes';
 import quotationRoutes from './quotation.routes';
 import approvalRoutes from './approval.routes';
-import purchaseOrderRoutes from './purchaseOrder.routes';
+import purchaseOrderRoutes from './purchase-order.routes';
 import invoiceRoutes from './invoice.routes';
 
 const router = Router();

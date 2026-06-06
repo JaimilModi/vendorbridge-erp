@@ -13,6 +13,7 @@ import Quotations from './pages/Quotations';
 import QuotationDetails from './pages/QuotationDetails';
 import Approvals from './pages/Approvals';
 import PurchaseOrders from './pages/PurchaseOrders';
+import PurchaseOrderDetails from './pages/PurchaseOrderDetails';
 import Invoices from './pages/Invoices';
 import Reports from './pages/Reports';
 
@@ -50,9 +51,10 @@ const App: React.FC = () => {
             <Route path="rfqs" element={<ProtectedRoute allowedRoles={['PROCUREMENT_OFFICER', 'VENDOR']}><RFQs /></ProtectedRoute>} />
             <Route path="rfqs/:id" element={<ProtectedRoute allowedRoles={['PROCUREMENT_OFFICER', 'VENDOR', 'ADMIN']}><RFQDetails /></ProtectedRoute>} />
             <Route path="quotations" element={<ProtectedRoute allowedRoles={['VENDOR', 'PROCUREMENT_OFFICER', 'ADMIN']}><Quotations /></ProtectedRoute>} />
-            <Route path="quotations/:id" element={<ProtectedRoute allowedRoles={['VENDOR', 'PROCUREMENT_OFFICER', 'ADMIN']}><QuotationDetails /></ProtectedRoute>} />
-            <Route path="approvals" element={<ProtectedRoute allowedRoles={['MANAGER']}><Approvals /></ProtectedRoute>} />
-            <Route path="purchase-orders" element={<ProtectedRoute allowedRoles={['PROCUREMENT_OFFICER', 'VENDOR']}><PurchaseOrders /></ProtectedRoute>} />
+            <Route path="quotations/:id"element={<ProtectedRoute allowedRoles={['VENDOR','PROCUREMENT_OFFICER','ADMIN','MANAGER']}><QuotationDetails /></ProtectedRoute>}/>
+            <Route path="approvals" element={<ProtectedRoute allowedRoles={['MANAGER', 'PROCUREMENT_OFFICER', 'VENDOR', 'ADMIN']}><Approvals /></ProtectedRoute>} />
+            <Route path="purchase-orders" element={<ProtectedRoute allowedRoles={['PROCUREMENT_OFFICER', 'VENDOR', 'MANAGER', 'ADMIN']}><PurchaseOrders /></ProtectedRoute>} />
+            <Route path="purchase-orders/:id" element={<ProtectedRoute allowedRoles={['PROCUREMENT_OFFICER', 'VENDOR', 'MANAGER', 'ADMIN']}><PurchaseOrderDetails /></ProtectedRoute>} />
             <Route path="invoices" element={<ProtectedRoute allowedRoles={['PROCUREMENT_OFFICER', 'VENDOR']}><Invoices /></ProtectedRoute>} />
             <Route path="reports" element={<ProtectedRoute allowedRoles={['ADMIN', 'MANAGER']}><Reports /></ProtectedRoute>} />
           </Route>

@@ -5,7 +5,7 @@ import { AuthRequest } from '../middleware/auth';
 export class ApprovalController {
   static async getAll(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const approvals = await ApprovalService.getAll();
+      const approvals = await ApprovalService.getAll(req.user?.role, req.user?.userId);
       return res.status(200).json(approvals);
     } catch (error: any) {
       return res.status(500).json({ message: error.message });
@@ -14,13 +14,13 @@ export class ApprovalController {
 
   static async getById(req: AuthRequest, res: Response, next: NextFunction) {
     try {
-      const approval = await ApprovalService.getById(req.params.id);
+      const approval = await ApprovalService.getById(req.params.id, req.user?.role, req.user?.userId);
       if (!approval) {
         return res.status(404).json({ message: 'Approval record not found' });
       }
       return res.status(200).json(approval);
     } catch (error: any) {
-      return res.status(500).json({ message: error.message });
+      return res.status(error.message.includes('Access denied') ? 403 : 500).json({ message: error.message });
     }
   }
 

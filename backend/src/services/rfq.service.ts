@@ -3,6 +3,7 @@ import { prisma } from '../config/db';
 export class RFQService {
   static async getAll(userRole?: string) {
     const where = userRole === 'VENDOR' ? { status: 'OPEN' as const } : {};
+
     return prisma.rFQ.findMany({
       where,
       include: {
@@ -53,7 +54,12 @@ export class RFQService {
       title: string;
       description?: string;
       deadline: string;
-      items: { productName: string; description?: string; quantity: number; uom: string }[];
+      items: {
+        productName: string;
+        description?: string;
+        quantity: number;
+        uom: string;
+      }[];
     }
   ) {
     return prisma.rFQ.create({
@@ -62,8 +68,14 @@ export class RFQService {
         description: data.description,
         deadline: new Date(data.deadline),
         createdById,
+
         items: {
-          create: data.items,
+          create: data.items.map((item) => ({
+            productName: item.productName,
+            description: item.description,
+            quantity: Number(item.quantity),
+            uom: item.uom,
+          })),
         },
       },
       include: {
@@ -79,12 +91,20 @@ export class RFQService {
       description?: string;
       status: 'DRAFT' | 'OPEN' | 'CLOSED' | 'AWARDED';
       deadline: string;
-      items?: { productName: string; description?: string; quantity: number; uom: string }[];
+      items?: {
+        productName: string;
+        description?: string;
+        quantity: number;
+        uom: string;
+      }[];
     }
   ) {
-    if (data.items) {
+    if (data.items && data.items.length > 0) {
       return prisma.$transaction(async (tx) => {
-        await tx.rFQItem.deleteMany({ where: { rfqId: id } });
+        await tx.rFQItem.deleteMany({
+          where: { rfqId: id },
+        });
+
         return tx.rFQ.update({
           where: { id },
           data: {
@@ -92,11 +112,19 @@ export class RFQService {
             description: data.description,
             status: data.status,
             deadline: new Date(data.deadline),
+
             items: {
-              create: data.items,
-            },
+            create: data.items!.map((item) => ({
+              productName: item.productName,
+              description: item.description,
+              quantity: Number(item.quantity),
+              uom: item.uom,
+            })),
           },
-          include: { items: true },
+          },
+          include: {
+            items: true,
+          },
         });
       });
     }
@@ -107,9 +135,11 @@ export class RFQService {
         title: data.title,
         description: data.description,
         status: data.status,
-        deadline: data.deadline ? new Date(data.deadline) : undefined,
+        deadline: new Date(data.deadline),
       },
-      include: { items: true },
+      include: {
+        items: true,
+      },
     });
   }
 

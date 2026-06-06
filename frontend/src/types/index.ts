@@ -82,6 +82,7 @@ export interface Quotation {
   totalAmount: number;
   validityDate: string;
   items?: QuotationItem[];
+  approvals?: Approval[];
   createdAt: string;
   updatedAt: string;
 }

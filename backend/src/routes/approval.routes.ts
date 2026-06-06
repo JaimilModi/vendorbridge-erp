@@ -5,8 +5,8 @@ import { authenticate, authorize } from '../middleware/auth';
 
 const router = Router();
 
-router.get('/', authenticate, ApprovalController.getAll);
-router.get('/:id', authenticate, ApprovalController.getById);
+router.get('/', authenticate, authorize(['MANAGER', 'PROCUREMENT_OFFICER', 'VENDOR', 'ADMIN']), ApprovalController.getAll);
+router.get('/:id', authenticate, authorize(['MANAGER', 'PROCUREMENT_OFFICER', 'VENDOR', 'ADMIN']), ApprovalController.getById);
 router.post('/', authenticate, authorize(['MANAGER', 'ADMIN']), validateApproval, ApprovalController.create);
 
 export default router;

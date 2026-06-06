@@ -167,6 +167,12 @@ const getMenuItems = () => {
       },
 
       {
+        key: '/purchase-orders',
+        icon: <ShoppingCartOutlined />,
+        label: 'Purchase Orders',
+      },
+
+      {
         key: '/reports',
         icon: <LineChartOutlined />,
         label: 'Reports',

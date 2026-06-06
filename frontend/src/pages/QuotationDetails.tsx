@@ -15,6 +15,8 @@ const QuotationDetails: React.FC = () => {
   const [quotation, setQuotation] = useState<Quotation | null>(null);
   const [loading, setLoading] = useState(true);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [remarks, setRemarks] = useState('');
+  const [submittingApproval, setSubmittingApproval] = useState(false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const [form] = Form.useForm();
@@ -35,6 +37,24 @@ const QuotationDetails: React.FC = () => {
   useEffect(() => {
     fetchQuotationDetails();
   }, [id]);
+
+  const handleApprovalAction = async (status: 'APPROVED' | 'REJECTED') => {
+    setSubmittingApproval(true);
+    try {
+      await api.post('/approvals', {
+        quotationId: id,
+        status,
+        remarks: remarks.trim() || undefined,
+      });
+      message.success(`Quotation ${status === 'APPROVED' ? 'approved' : 'rejected'} successfully`);
+      setRemarks('');
+      fetchQuotationDetails();
+    } catch (error: any) {
+      message.error(error.response?.data?.message || 'Failed to submit approval decision');
+    } finally {
+      setSubmittingApproval(false);
+    }
+  };
 
   const isOwner = user?.role === 'VENDOR' && quotation?.vendorId === user?.vendorId;
   const isRfqOpen = quotation?.rfq?.status === 'OPEN';
@@ -206,6 +226,77 @@ const QuotationDetails: React.FC = () => {
           pagination={false}
         />
       </Card>
+
+      {/* Manager Action Panel */}
+      {user?.role === 'MANAGER' && quotation.status === 'SUBMITTED' && (
+        <Card title="Quotation Approval Review" className="card-shadow" style={{ marginTop: 24 }}>
+          <Paragraph>As a Manager, you can review and decide on this quotation proposal.</Paragraph>
+          <div style={{ marginBottom: 16 }}>
+            <Typography.Text strong>Review Comments / Remarks:</Typography.Text>
+            <Input.TextArea
+              rows={4}
+              value={remarks}
+              onChange={(e) => setRemarks(e.target.value)}
+              placeholder="Provide reasons, approval conditions, or feedback..."
+              style={{ marginTop: 8 }}
+            />
+          </div>
+          <Space>
+            <Button
+              type="primary"
+              style={{ backgroundColor: '#52c41a', borderColor: '#52c41a' }}
+              onClick={() => handleApprovalAction('APPROVED')}
+              loading={submittingApproval}
+            >
+              Approve Quotation
+            </Button>
+            <Button
+              type="primary"
+              danger
+              onClick={() => handleApprovalAction('REJECTED')}
+              loading={submittingApproval}
+            >
+              Reject Quotation
+            </Button>
+          </Space>
+        </Card>
+      )}
+
+      {/* Approval History Logs */}
+      {quotation.approvals && quotation.approvals.length > 0 && (
+        <Card title="Approval Log History" className="card-shadow" style={{ marginTop: 24 }}>
+          <Table
+            pagination={false}
+            dataSource={quotation.approvals.map((app: any) => ({ ...app, key: app.id }))}
+            columns={[
+              {
+                title: 'Reviewer',
+                dataIndex: 'approvedBy',
+                key: 'reviewer',
+                render: (approvedBy: any) => approvedBy ? `${approvedBy.firstName} ${approvedBy.lastName}` : 'System',
+              },
+              {
+                title: 'Decision',
+                dataIndex: 'status',
+                key: 'status',
+                render: (status: string) => <Tag color={getStatusTagColor(status)}>{status}</Tag>,
+              },
+              {
+                title: 'Remarks / Comments',
+                dataIndex: 'remarks',
+                key: 'remarks',
+                render: (val: string) => val || <span style={{ color: '#bfbfbf' }}>No remarks provided.</span>,
+              },
+              {
+                title: 'Date Processed',
+                dataIndex: 'createdAt',
+                key: 'date',
+                render: (date: string) => formatDate(date) + ' ' + new Date(date).toLocaleTimeString(),
+              },
+            ]}
+          />
+        </Card>
+      )}
 
       {/* Edit Quotation Modal */}
       <Modal
